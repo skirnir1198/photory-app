@@ -1,35 +1,21 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:google_sign_in/google_sign_in.dart';
 
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  final GoogleSignIn _googleSignIn = GoogleSignIn();
 
   Stream<User?> get user => _auth.authStateChanges();
 
-  Future<User?> signInWithGoogle() async {
+  Future<User?> signInAnonymously() async {
     try {
-      final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
-      if (googleUser == null) {
-        return null; // The user canceled the sign-in
-      }
-
-      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
-      final AuthCredential credential = GoogleAuthProvider.credential(
-        accessToken: googleAuth.accessToken,
-        idToken: googleAuth.idToken,
-      );
-
-      final UserCredential userCredential = await _auth.signInWithCredential(credential);
-      return userCredential.user;
+      final result = await _auth.signInAnonymously();
+      return result.user;
     } catch (e) {
-      print(e);
+      // In a real app, you'd want to log this to a service
       return null;
     }
   }
 
   Future<void> signOut() async {
-    await _googleSignIn.signOut();
     await _auth.signOut();
   }
 }

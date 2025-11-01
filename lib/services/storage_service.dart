@@ -1,28 +1,22 @@
 import 'dart:io';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
-import 'package:image_picker/image_picker.dart';
+import 'package:uuid/uuid.dart';
 
 class StorageService {
   final FirebaseStorage _storage = FirebaseStorage.instance;
-  final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  Future<String?> uploadImage(XFile image) async {
-    final user = _auth.currentUser;
-    if (user == null) {
-      return null;
-    }
+  Future<String> uploadImage(File image) async {
+    final String fileName = const Uuid().v4();
+    final Reference ref = _storage.ref().child('images/$fileName');
+    final UploadTask uploadTask = ref.putFile(image);
+    final TaskSnapshot snapshot = await uploadTask;
+    return await snapshot.ref.getDownloadURL();
+  }
 
-    final filePath = 'users/${user.uid}/images/${DateTime.now().millisecondsSinceEpoch}.jpg';
-    final ref = _storage.ref().child(filePath);
-
-    try {
-      final uploadTask = await ref.putFile(File(image.path));
-      final url = await uploadTask.ref.getDownloadURL();
-      return url;
-    } catch (e) {
-      print(e);
-      return null;
+  Future<void> deleteImage(String imageUrl) async {
+    if (imageUrl.isNotEmpty) {
+      final Reference ref = _storage.refFromURL(imageUrl);
+      await ref.delete();
     }
   }
 }

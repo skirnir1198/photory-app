@@ -1,34 +1,52 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Milestone {
-  final String? id;
+  final String id;
   final String title;
   final DateTime date;
-  final String imageUrl;
+  final String? imageUrl;
+  final String userId;
 
   Milestone({
-    this.id,
+    required this.id,
     required this.title,
     required this.date,
-    required this.imageUrl,
+    this.imageUrl,
+    required this.userId,
   });
 
-  factory Milestone.fromFirestore(DocumentSnapshot doc) {
-    Map data = doc.data() as Map<String, dynamic>;;
+  Milestone copyWith({
+    String? id,
+    String? title,
+    DateTime? date,
+    String? imageUrl,
+    String? userId,
+  }) {
     return Milestone(
-      id: doc.id,
-      title: data['title'] ?? '',
-      date: (data['date'] as Timestamp).toDate(),
-      imageUrl: data['imageUrl'] ?? '',
+      id: id ?? this.id,
+      title: title ?? this.title,
+      date: date ?? this.date,
+      imageUrl: imageUrl ?? this.imageUrl,
+      userId: userId ?? this.userId,
     );
   }
 
-  Map<String, dynamic> toFirestore() {
+  Map<String, dynamic> toJson() {
     return {
       'title': title,
       'date': Timestamp.fromDate(date),
       'imageUrl': imageUrl,
-      'createdAt': FieldValue.serverTimestamp(),
+      'userId': userId,
     };
+  }
+
+  factory Milestone.fromJson(Map<String, dynamic> json) {
+    return Milestone(
+      id: json['id'] ?? '', // This will be overwritten by document ID
+      title: json['title'] ?? '',
+      date: (json['date'] as Timestamp).toDate(),
+      imageUrl: json['imageUrl'] as String?,
+      userId: json['userId'] ?? '',
+    );
   }
 }

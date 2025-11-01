@@ -1,82 +1,104 @@
-# Project Blueprint: Photo Milestone Tracker
+# 記念日アプリ 設計書
 
-## 1. Overview
+## 概要
 
-This document outlines the plan for creating a minimal viable product (MVP) of a mobile application for iOS and Android. The app's core function is to allow users to log, track, and be reminded of important anniversaries, milestones, and personal dates, with a strong emphasis on a photo-centric, emotional user experience.
+このアプリは、ユーザーが個人的な記念日を記録し、その日からの経過日数を追跡できるFlutterアプリケーションです。Firebase Authenticationによるユーザー認証、Firestoreによるデータ永続化、Firebase Storageによる画像保存を特徴とします。
 
-This version of the application will be built using Flutter and will leverage Firebase for backend services, including authentication, database, and file storage.
+## 機能一覧
 
-## 2. Design and Features
+### 1. ユーザー認証
+- メールアドレスとパスワードによるサインアップおよびログイン機能。
+- 認証状態に応じて、ホーム画面またはログイン画面に自動的にリダイレクト。
 
-### Core Philosophy
+### 2. 記念日の管理 (CRUD)
 
--   **Photo-Centric:** The user's uploaded photo is the "hero" of the UI. Text is secondary, layered on top to provide context.
--   **Warm & Clean:** The aesthetic must be minimal, clean, and spacious, but with a warm, personal, and inviting feel. The goal is to create an emotional "memory log," not a sterile utility.
--   **Simplicity:** The app must be extremely intuitive, with a minimal learning curve, assuming a non-tech-savvy user.
+#### **記念日の追加 (Create)**
+- ホーム画面のAppBarにある「+」ボタンをタップすると、画面右側から入力用のドロワーが表示されます。
+- ドロワーには以下の要素が含まれます:
+    - 記念日名を入力するテキストフィールド
+    - 記念日の日付を選択するカレンダーピッカー
+    - 記念日の画像を選択するボタン
+    - 「記念日を追加」ボタン
+- 追加された記念日と画像はFirestoreとFirebase Storageに保存されます。
 
-### Design System
+#### **記念日の表示 (Read)**
+- ホーム画面の下部に、登録されている記念日がリスト形式で表示されます。
+- 各リストアイテムには、記念日の名称と、その日から今日までの経過日数が表示されます。
+- 記念日データはFirestoreからリアルタイムでストリーミングされます。
 
--   **Color Palette:**
-    -   Base Background: Off-White (`#FAF9F6`)
-    -   Primary Text: Dark Gray (`#333333`)
-    -   Accent Color: Dusty Pink (`#D9AAB7`)
--   **Typography (using `google_fonts`):**
-    -   Milestone Titles: `Lora` (a modern, warm Serif).
-    -   Day Count: `Montserrat` (clean, stylish, and highly legible Sans-Serif).
-    -   Body/Helper Text: `Noto Sans` (a standard, legible Sans-Serif).
+#### **記念日の詳細・編集 (Update)**
+- リスト内の記念日をタップすると、その記念日の詳細画面に遷移します。
+- 詳細画面には、登録された画像、記念日名、経過日数が表示されます。
+- 詳細画面の右上に「編集」ボタンが配置されます。
+- 「編集」ボタンをタップすると編集ページに遷移し、記念日名、日付、画像を更新できます。
+- 更新された情報はFirestoreとFirebase Storageに保存されます。
 
-### Implemented Features
+#### **記念日の削除 (Delete)**
+- 編集ページに「削除」ボタンが配置されます。
+- 削除ボタンをタップすると、確認ダイアログが表示された後、記念日と関連画像がFirestoreとFirebase Storageから削除されます。
 
-The MVP will consist of three essential screens, all connected to a Firebase backend.
+## 画面設計
 
-1.  **Authentication / Splash Screen:**
-    -   Provides a single "Sign in with Google" button for authentication.
-    -   This is the entry point of the app and ensures all data is tied to a specific user account.
+1.  **認証画面 (`auth_wrapper.dart`, `login_screen.dart`など)**
+    *   ログインフォームと新規登録フォームを提供します。
 
-2.  **Home Screen (The "Memory List"):**
-    -   Displays all of the user's saved milestones in a vertical-scrolling, single-column list of "Memory Cards."
-    -   Each card's background is the user-uploaded photo, with a dark gradient overlay for text legibility.
-    -   A Floating Action Button (FAB) allows users to add new memories.
+2.  **ホーム画面 (`anniversary_screen.dart`)**
+    *   **AppBar**:
+        *   タイトル: `記念日一覧`
+        *   アクション:
+            *   ログアウトボタン
+            *   記念日追加用の「+」アイコンボタン
+    *   **EndDrawer (記念日追加用)**:
+        *   記念日名入力フィールド
+        *   日付選択ボタン
+        *   画像選択ボタン
+        *   追加実行ボタン
+    *   **Body**:
+        *   登録済み記念日のリストを`ListView`で表示。
+        *   各アイテムには経過日数と記念日名を表示。
 
-3.  **Add/Edit Screen:**
-    -   A simple, full-screen form to create or edit a milestone.
-    -   Includes a photo selector, a title input field, and a date picker.
-    -   A "Save" button persists the data to Firebase.
+3.  **記念日詳細画面 (`anniversary_detail_screen.dart`)**
+    *   **AppBar**:
+        *   タイトル: 記念日名
+        *   アクション: 編集ボタン
+    *   **Body**:
+        *   記念日の画像、詳細情報（日付など）を表示。
 
-## 3. Backend Architecture
+4.  **記念日編集画面 (`edit_anniversary_screen.dart`)**
+    *   **AppBar**:
+        *   タイトル: `記念日の編集`
+        *   アクション: 削除ボタン
+    *   **Body**:
+        *   記念日名、日付、画像を編集するためのフォーム。
+        *   「更新」ボタンを配置。
 
--   **Firebase Authentication:** Google Sign-in will be the sole authentication provider.
--   **Cloud Firestore:**
-    -   **Structure:** A `users` collection where each document ID is the user's Firebase Auth UID. Each user document contains an `anniversaries` subcollection.
-    -   **Data Model (`anniversaries` document):**
-        -   `title`: (String)
-        -   `date`: (Timestamp)
-        -   `imageUrl`: (String) - URL from Cloud Storage.
-        -   `createdAt`: (Timestamp)
--   **Cloud Storage for Firebase:**
-    -   **Folder Structure:** `users/{userId}/images/{imageName.jpg}`.
-    -   **Rules:** Storage will be secured so that users can only access their own image folder.
+## データモデル (`milestone.dart`)
 
-## 4. Current Plan
+Firestoreに保存される記念日（Milestone）のデータ構造は以下の通りです。
 
-The following steps will be taken to build the application:
+```dart
+@freezed
+class Milestone with _$Milestone {
+  const factory Milestone({
+    String? id,
+    required String title,
+    required DateTime date,
+    required String userId,
+    String? imageUrl,
+  }) = _Milestone;
 
-1.  **Setup Firebase:**
-    -   Add `firebase_core`, `firebase_auth`, `cloud_firestore`, `firebase_storage`, `google_sign_in`, and `image_picker` to `pubspec.yaml`.
-    -   Configure the Firebase project and initialize Firebase within the app.
-2.  **Implement Authentication:**
-    -   Create an authentication service to handle Google Sign-in.
-    -   Build the UI for the login screen.
-    -   Create a wrapper widget that directs users to the login screen or home screen based on their auth state.
-3.  **Build Core UI & Services:**
-    -   Create the data model for a milestone.
-    -   Develop a Firestore service for database operations.
-    -   Develop a Storage service for uploading photos.
-4.  **Develop Screens:**
-    -   **Home Screen:** Fetch and display the list of milestones from Firestore.
-    -   **Add/Edit Screen:** Create the form, handle image picking, and save the data to Firebase.
-5.  **Refine Theme & Style:**
-    -   Implement the color scheme and typography using `ThemeData` and `google_fonts`.
-    -   Polish the UI to match the "warm & clean" design philosophy.
-6.  **Set Security Rules:**
-    -   Write and deploy Firestore and Storage security rules to protect user data.
+  factory Milestone.fromJson(Map<String, dynamic> json) => _$MilestoneFromJson(json);
+}
+```
+
+## 使用する主要パッケージ
+
+- `firebase_auth`: ユーザー認証
+- `cloud_firestore`: データベース
+- `firebase_storage`: 画像ストレージ
+- `flutter_riverpod` / `provider`: 状態管理
+- `intl`: 日付フォーマット
+- `image_picker`: 画像選択
+- `freezed`: モデルクラスの生成
+- `build_runner`: コード生成
+

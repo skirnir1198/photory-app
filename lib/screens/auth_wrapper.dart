@@ -1,8 +1,7 @@
-import 'package:firebase_auth/firebase_auth.dart';
+
 import 'package:flutter/material.dart';
-import 'package:myapp/screens/home_screen.dart';
-import 'package:myapp/screens/login_screen.dart';
-import 'package:myapp/services/auth_service.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:myapp/screens/anniversary_screen.dart';
 import 'package:provider/provider.dart';
 
 class AuthWrapper extends StatelessWidget {
@@ -10,24 +9,17 @@ class AuthWrapper extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final authService = Provider.of<AuthService>(context, listen: false);
+    final user = Provider.of<User?>(context);
 
-    return StreamBuilder<User?>(
-      stream: authService.user,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Scaffold(
-            body: Center(
-              child: CircularProgressIndicator(),
-            ),
-          );
-        }
-        if (snapshot.hasData) {
-          return const HomeScreen();
-        } else {
-          return const LoginScreen();
-        }
-      },
-    );
+    if (user != null) {
+      return AnniversaryScreen(userId: user.uid);
+    } else {
+      // ログインしていない場合は、ログインを促す画面などを表示
+      return const Scaffold(
+        body: Center(
+          child: Text('Please sign in to see your anniversaries.'),
+        ),
+      );
+    }
   }
 }
