@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "456184968953",
+    "project_id": "anniversary-tracker-app",
+    "storage_bucket": "anniversary-tracker-app.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:456184968953:android:efc2a8d2b6ccc8498b9428",
+        "android_client_info": {
+          "package_name": "com.example.myapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDS-_rM-OrM3b5_F_YGSLEZORCPUMu95RQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
